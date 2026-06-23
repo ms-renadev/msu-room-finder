@@ -61,7 +61,7 @@ function displayRooms(rooms) {
         
         const imageBlock = room.image 
             ? `<img src="${room.image}" alt="${room.code}" style="width:100%; height:150px; object-fit:cover; border-top-left-radius:8px; border-top-right-radius:8px;">`
-            : `<div class="card-img-placeholder"><span class="card-flower-icon">🌸</span></div>`;
+            : `<div class="card-img-placeholder"><img src="assets/logo.png" alt="" class="card-placeholder-icon"></div>`;
 
         card.innerHTML = `
             ${imageBlock}
