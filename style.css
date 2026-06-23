@@ -1,0 +1,214 @@
+:root {
+    --msu-maroon: #7A1C1C;
+    --pastel-pink: #FFD1D1;
+    --light-pink: #FFF0F0;
+    --bg-cream: #FFFDF9;
+    --text-dark: #3F3333;
+    --text-light: #8A7A7A;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    background-color: var(--bg-cream);
+    color: var(--text-dark);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR LAYOUT */
+.sidebar {
+    width: 260px;
+    background-color: var(--msu-maroon);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    position: fixed;
+    height: 100vh;
+}
+
+.sidebar-brand h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    letter-spacing: -0.5px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.nav-links li {
+    padding: 14px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-links li:hover, .nav-links li.active {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--pastel-pink);
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.login-btn:hover {
+    background: var(--pastel-pink);
+    color: var(--msu-maroon);
+}
+
+/* MAIN CONTENT & BANNER */
+.main-content {
+    margin-left: 260px;
+    flex: 1;
+    padding: 30px;
+}
+
+.top-banner {
+    background-color: var(--msu-maroon);
+    border-radius: 24px;
+    padding: 40px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.banner-text h1 {
+    font-size: 32px;
+    margin: 10px 0 4px 0;
+}
+
+.banner-text p {
+    color: var(--pastel-pink);
+    font-size: 14px;
+}
+
+.search-box {
+    position: relative;
+    width: 320px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 14px 20px 14px 45px;
+    border-radius: 50px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* CARDS GRID STYLE */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.room-card {
+    background: var(--light-pink);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(122, 28, 28, 0.03);
+    border: 1px solid rgba(122, 28, 28, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-img-placeholder {
+    height: 160px;
+    background-color: var(--pastel-pink);
+    position: relative;
+}
+
+.card-flower-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 18px;
+}
+
+.card-info {
+    padding: 20px;
+}
+
+.card-info h3 {
+    color: var(--msu-maroon);
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.card-info p {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text-dark);
+}
+
+/* MODAL STYLES */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 24px; cursor: pointer;
+}

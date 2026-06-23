@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSU Room Finder</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="sidebar-brand">
+            <h2>MSU Room Finder</h2>
+        </div>
+        <ul class="nav-links">
+            <li class="active" id="nav-home"><span>🏠</span> Home</li>
+            <li id="nav-colleges"><span>🏫</span> Colleges</li>
+            <li id="nav-exams"><span>📝</span> Exam Rooms</li>
+            <li id="nav-saved"><span>🌸</span> Saved Rooms</li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="login-btn" id="loginBtn">👤 Login / Signup</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-banner">
+            <div class="banner-text">
+                <span class="badge">📍 MSU CAMPUS GUIDE</span>
+                <h1>MSU Room Finder 🌸</h1>
+                <p>Where is your next class, girlie? Let's check! ✨</p>
+            </div>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search a room or building...">
+            </div>
+        </header>
+
+        <section class="grid-container" id="gridContainer">
+            </section>
+    </main>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h3>Notice 🌸</h3>
+            <p>Para makapag saved ng room feature, need mag log-in!</p>
+            <p style="font-size: 12px; color: #8A7A7A; margin-top: 10px;">(Backend authentication coming soon)</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
