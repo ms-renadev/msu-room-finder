@@ -4,50 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MSU Room Finder</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" ></script>
-    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js" defer></script>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <nav class="sidebar">
+    <nav class="sidebar" id="sidebar">
         <div class="sidebar-brand">
             <h2>MSU Room Finder</h2>
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">&#9776;</button>
         </div>
+
         <ul class="nav-links">
-            <li class="active" id="nav-home"
-            <a href="index.html">
-                <img src="assets/Home.png" alt="Home" class="nav-icon">Home
-            </a>
-            ></li>
-
-            <li id="nav-colleges"
-            <a href="colleges.html">
-                <img src="assets/colleges.png" alt="Colleges" class="nav-icon">Colleges
-            </a>
-            ></li>
-
-            <li id="nav-exams">
-            <a href="exams.html">
-                <img src="assets/exams.png" alt="Exam Rooms" class="nav-icon"> Exam Rooms
-            </a>
+            <li class="active" id="nav-home" data-label="Home">
+                <a href="index.html">
+                    <img src="assets/Home.png" alt="" class="nav-icon">
+                    <span class="nav-label">Home</span>
+                </a>
             </li>
-
-            <li id="nav-saved">
-            <a href="savedrooms.html">
-                <img src="assets/savedRoom.png" alt="Saved Rooms" class="nav-icon"> Saved Rooms
-            </a>
+            <li id="nav-colleges" data-label="Colleges">
+                <a href="colleges.html">
+                    <img src="assets/colleges.png" alt="" class="nav-icon">
+                    <span class="nav-label">Colleges</span>
+                </a>
+            </li>
+            <li id="nav-exams" data-label="Exam Rooms">
+                <a href="exams.html">
+                    <img src="assets/exams.png" alt="" class="nav-icon">
+                    <span class="nav-label">Exam Rooms</span>
+                </a>
+            </li>
+            <li id="nav-saved" data-label="Saved Rooms">
+                <a href="savedrooms.html">
+                    <img src="assets/savedRoom.png" alt="" class="nav-icon">
+                    <span class="nav-label">Saved Rooms</span>
+                </a>
             </li>
         </ul>
+
         <div class="sidebar-footer">
-            <button class="login-btn" id="loginBtn">👤 Login / Signup</button>
+            <button class="login-btn" id="loginBtn">
+                <span>👤</span>
+                <span class="login-btn-label">Login / Signup</span>
+            </button>
         </div>
     </nav>
 
-    <main class="main-content">
+    <main class="main-content" id="mainContent">
         <header class="top-banner">
             <div class="banner-text">
                 <span class="badge">📍 MSU CAMPUS GUIDE</span>
@@ -60,6 +67,7 @@
             </div>
         </header>
 
+        <p class="section-label">All Rooms</p>
         <section class="grid-container" id="gridContainer"></section>
     </main>
 
@@ -67,18 +75,29 @@
         <div class="modal-content">
             <span class="close-modal" id="closeModal">&times;</span>
             <h3 style="color: var(--msu-maroon); margin-bottom: 15px;">Welcome, Girlie! 🌸</h3>
-            
-            <div class="auth-form" style="display: flex; flex-direction: column; gap: 10px;">
-                <input type="email" id="authEmail" placeholder="Enter email address" style="width: 100%; padding: 12px; border: 1px solid var(--pastel-pink); border-radius: 10px; outline: none;">
-                <input type="password" id="authPassword" placeholder="Enter password" style="width: 100%; padding: 12px; border: 1px solid var(--pastel-pink); border-radius: 10px; outline: none; margin-bottom: 5px;">
-                
-                <div style="display: flex; gap: 10px;">
-                    <button id="signInBtn" style="flex: 1; padding: 12px; background: var(--msu-maroon); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">Sign In</button>
-                    <button id="signUpBtn" style="flex: 1; padding: 12px; background: transparent; color: var(--msu-maroon); border: 1px solid var(--msu-maroon); border-radius: 10px; cursor: pointer; font-weight: 600;">Sign Up</button>
+            <div class="auth-form" style="display:flex; flex-direction:column; gap:10px;">
+                <input type="email" id="authEmail" placeholder="Enter email address"
+                    style="width:100%; padding:12px; border:1px solid var(--pastel-pink); border-radius:10px; outline:none; font-size:14px;">
+                <input type="password" id="authPassword" placeholder="Enter password"
+                    style="width:100%; padding:12px; border:1px solid var(--pastel-pink); border-radius:10px; outline:none; font-size:14px; margin-bottom:5px;">
+                <div style="display:flex; gap:10px;">
+                    <button id="signInBtn" style="flex:1; padding:12px; background:var(--msu-maroon); color:white; border:none; border-radius:10px; cursor:pointer; font-weight:600; font-size:14px;">Sign In</button>
+                    <button id="signUpBtn" style="flex:1; padding:12px; background:transparent; color:var(--msu-maroon); border:1px solid var(--msu-maroon); border-radius:10px; cursor:pointer; font-weight:600; font-size:14px;">Sign Up</button>
                 </div>
             </div>
-            <div id="authStatusMessage" style="margin-top: 15px; font-size: 13px; font-weight: 500;"></div>
+            <div id="authStatusMessage" style="margin-top:15px; font-size:13px; font-weight:500;"></div>
         </div>
     </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const toggleBtn = document.getElementById('sidebarToggle');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        });
+    </script>
 </body>
 </html>

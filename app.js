@@ -19,10 +19,10 @@ const mockRooms = [
 // Read campus locations securely from the database
 async function fetchRoomsFromDatabase() {
     try {
-        if (!supabase) return;
+        if (!supabaseClient) return;
         console.log("Connecting to database room list...");
         
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('room')
             .select('roomID, roomNumber, description'); 
 
@@ -85,8 +85,8 @@ function setupEventListeners() {
     gridContainer = document.getElementById('gridContainer');
     
     // Safety check initialization binding sequence
-    if (typeof supabaseJs !== 'undefined') {
-        supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    if (typeof supabase !== "undefined") {
+        supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     } else {
         console.error("Critical failure: Supabase package asset CDN not found.");
     }
@@ -169,7 +169,7 @@ function setupEventListeners() {
             authStatusMessage.style.color = "orange";
             authStatusMessage.innerText = "Verifying keys...";
 
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -188,7 +188,7 @@ function setupEventListeners() {
 
     // Monitor identity token validation shifts 
     if (supabaseClient) {
-        supabase.auth.onAuthStateChange((event, session) => {
+        supabaseClient.auth.onAuthStateChange((event, session) => {
             if (session && loginBtn) {
                 loginBtn.innerText = `👤 ${session.user.email.split('@')[0]}`;
             } else if (loginBtn) {
