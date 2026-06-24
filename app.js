@@ -6,35 +6,29 @@ let liveRooms = [];
 let gridContainer;
 let searchInput;
 
-
-// ── TICKER / SLIDESHOW ──────────────────────────────────────
+// ── TICKER ──────────────────────────────────────────────────
 const tickerItems = [
-    { label: 'CCS-101', sub: 'College of Computer Studies — Main Bldg 1F' },
-    { label: 'ENG-205', sub: 'College of Engineering — 2nd Floor' },
+    { label: 'Multimedia Room', sub: 'CICS — First floor, left wing' },
+    { label: 'Room 302', sub: 'CICS — Second floor, left wing' },
     { label: 'Math Departmental Exam', sub: 'MATH-EX1 — Main Hall Room 201' },
     { label: 'MSU Main Library', sub: 'LIB-101 — Library Bldg Ground Floor' },
-    { label: 'BUS-102', sub: 'College of Business — Business Wing' },
-    { label: 'SCI-301', sub: 'College of Science — Science Lab 3F' },
+    { label: 'Board Exam Venue', sub: 'BOARD-01 — Gymnasium, Ground Floor' },
+    { label: 'Engineering Room', sub: 'COE — Engineering Bldg 3F' },
 ];
 
 function initTicker() {
     const track = document.getElementById('tickerTrack');
     if (!track) return;
-
     let current = 0;
 
-    function buildSlide(item, idx) {
+    tickerItems.forEach((item, i) => {
         const slide = document.createElement('button');
-        slide.className = 'ticker-slide' + (idx === 0 ? ' active' : '');
-        slide.dataset.idx = idx;
+        slide.className = 'ticker-slide' + (i === 0 ? ' active' : '');
         slide.innerHTML = `<strong>${item.label}</strong><span>${item.sub}</span>`;
         slide.addEventListener('click', () => filterByTicker(item));
-        return slide;
-    }
+        track.appendChild(slide);
+    });
 
-    tickerItems.forEach((item, i) => track.appendChild(buildSlide(item, i)));
-
-    // Dots
     const dotsEl = document.getElementById('tickerDots');
     if (dotsEl) {
         tickerItems.forEach((_, i) => {
@@ -46,16 +40,13 @@ function initTicker() {
     }
 
     function goTo(idx) {
-        const slides = track.querySelectorAll('.ticker-slide');
-        const dots = dotsEl ? dotsEl.querySelectorAll('.ticker-dot') : [];
-        slides.forEach(s => s.classList.remove('active'));
-        dots.forEach(d => d.classList.remove('active'));
-        slides[idx]?.classList.add('active');
-        dots[idx]?.classList.add('active');
+        track.querySelectorAll('.ticker-slide').forEach(s => s.classList.remove('active'));
+        dotsEl?.querySelectorAll('.ticker-dot').forEach(d => d.classList.remove('active'));
+        track.querySelectorAll('.ticker-slide')[idx]?.classList.add('active');
+        dotsEl?.querySelectorAll('.ticker-dot')[idx]?.classList.add('active');
         current = idx;
     }
 
-    // Auto-advance every 3s
     setInterval(() => goTo((current + 1) % tickerItems.length), 3000);
 }
 
@@ -68,45 +59,57 @@ function filterByTicker(item) {
         r.direction.toLowerCase().includes(term)
     );
     displayRooms(filtered.length ? filtered : liveRooms);
-    // Scroll to grid
     document.getElementById('gridContainer')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── DATABASE ─────────────────────────────────────────────────
 async function fetchRoomsFromDatabase() {
-    // Always show fallback first so the page isn't blank
-    liveRooms = mockRooms;
-    displayRooms(liveRooms);
-
-    if (!supabaseClient) {
-        console.warn('Supabase not initialized — showing fallback cards.');
-        return;
-    }
+    if (!supabaseClient) { console.warn('Supabase not initialized.'); return; }
 
     try {
-        console.log('Fetching rooms from database...');
-        const { data, error } = await supabaseClient
+        // Step 1: Try with JOIN (works only if college table also has RLS policy or RLS disabled)
+        let { data, error } = await supabaseClient
             .from('room')
-            .select('roomID, roomNumber, description');
+            .select('roomID, roomNumber, description, roomImage, college ( collegeName )');
 
-        if (error) throw error;
+        if (error) {
+            console.warn('JOIN query failed, trying without JOIN:', error.message);
+            // Step 2: Fallback — fetch rooms only, without college join
+            const fallback = await supabaseClient
+                .from('room')
+                .select('roomID, roomNumber, description, roomImage, collegeID');
+
+            if (fallback.error) {
+                console.error('Both queries failed:', fallback.error.message);
+                showDbError('Cannot load rooms: ' + fallback.error.message);
+                return;
+            }
+            data = fallback.data;
+        }
 
         if (data && data.length > 0) {
-            console.log('DB rooms loaded:', data);
+            console.log('✅ Rooms loaded:', data);
             liveRooms = data.map(r => ({
                 id: r.roomID,
                 code: r.roomNumber,
-                direction: r.description || 'No directions written yet.',
-                image: null,
-                info: 'MSU Campus Room'
+                direction: r.description || 'No directions yet.',
+                image: r.roomImage || null,
+                // college may be null if JOIN failed or college has no RLS policy
+                info: (r.college && r.college.collegeName) ? r.college.collegeName : (r.collegeID ? 'College #' + r.collegeID : 'MSU Campus')
             }));
             displayRooms(liveRooms);
         } else {
-            console.warn('No DB data — keeping fallback cards.');
+            showDbError('No rooms in the database yet. Add rooms in Supabase → room table.');
         }
     } catch (err) {
-        console.error('DB fetch failed:', err.message, '— keeping fallback cards.');
+        console.error('Unexpected error:', err);
+        showDbError('Unexpected error: ' + err.message);
     }
+}
+
+function showDbError(msg) {
+    const grid = document.getElementById('gridContainer');
+    if (grid) grid.innerHTML = `<div class="db-error-notice"><span class="material-symbols-rounded">warning</span><p>${msg}</p></div>`;
 }
 
 // ── RENDER CARDS ─────────────────────────────────────────────
@@ -115,27 +118,32 @@ function displayRooms(rooms) {
     if (!gridContainer) return;
     gridContainer.innerHTML = '';
 
-    if (!rooms.length) {
-        gridContainer.innerHTML = '<p class="empty-state">No rooms found.</p>';
-        return;
-    }
+    if (!rooms.length) { gridContainer.innerHTML = '<p class="empty-state">No rooms found.</p>'; return; }
 
     rooms.forEach(room => {
         const card = document.createElement('div');
         card.className = 'room-card';
 
         const imageBlock = room.image
-            ? `<img src="${room.image}" alt="${room.code}" class="card-cover">`
-            : `<div class="card-img-placeholder"><img src="assets/logo.png" alt="" class="card-placeholder-icon"></div>`;
+            ? `<div class="card-img-wrap"><img src="${room.image}" alt="${room.code}" class="card-cover"></div>`
+            : `<div class="card-img-placeholder"><div class="card-placeholder-flower">🌸</div></div>`;
 
         card.innerHTML = `
             ${imageBlock}
+            <button class="card-bookmark" title="Save room">
+                <span class="material-symbols-rounded">bookmark</span>
+            </button>
             <div class="card-info">
+                <span class="card-college-tag">${room.info}</span>
                 <h3>${room.code}</h3>
-                <p><strong>Building:</strong> ${room.info}</p>
                 <p class="card-dir">${room.direction}</p>
-            </div>
-        `;
+            </div>`;
+
+        card.querySelector('.card-bookmark').addEventListener('click', e => {
+            e.stopPropagation();
+            e.currentTarget.classList.toggle('saved');
+        });
+
         gridContainer.appendChild(card);
     });
 }
@@ -146,13 +154,11 @@ function openModalNotice() {
     if (modal) modal.style.display = 'flex';
 }
 
-// ── SIDEBAR TOGGLE (fix: show button even when collapsed) ────
 function initSidebar() {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('mainContent');
     const toggleBtn = document.getElementById('sidebarToggle');
     if (!sidebar || !toggleBtn) return;
-
     toggleBtn.addEventListener('click', () => {
         sidebar.classList.toggle('collapsed');
         if (mainContent) mainContent.classList.toggle('expanded');
@@ -164,7 +170,6 @@ function setupEventListeners() {
     searchInput = document.getElementById('searchInput');
     gridContainer = document.getElementById('gridContainer');
 
-    // Init Supabase
     if (typeof window.supabase !== 'undefined') {
         supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
     } else {
@@ -174,28 +179,23 @@ function setupEventListeners() {
     initSidebar();
     initTicker();
 
-    // Search
     if (searchInput) {
         searchInput.addEventListener('input', e => {
             const term = e.target.value.toLowerCase();
-            const filtered = liveRooms.filter(r =>
+            displayRooms(liveRooms.filter(r =>
                 r.code.toLowerCase().includes(term) ||
                 r.direction.toLowerCase().includes(term) ||
                 r.info.toLowerCase().includes(term)
-            );
-            displayRooms(filtered);
+            ));
         });
     }
 
-    // Modal controls
     const modal = document.getElementById('loginModal');
     const loginBtn = document.getElementById('loginBtn');
     const closeModal = document.getElementById('closeModal');
-
     if (loginBtn) loginBtn.addEventListener('click', openModalNotice);
     if (closeModal && modal) closeModal.addEventListener('click', () => modal.style.display = 'none');
 
-    // Auth
     const authEmail = document.getElementById('authEmail');
     const authPassword = document.getElementById('authPassword');
     const signInBtn = document.getElementById('signInBtn');
@@ -221,9 +221,7 @@ function setupEventListeners() {
             else {
                 authStatusMessage.style.color = 'green';
                 authStatusMessage.innerText = 'Logged in!';
-                if (loginBtn) {
-                    loginBtn.querySelector('.login-btn-label').textContent = data.user.email.split('@')[0];
-                }
+                if (loginBtn) loginBtn.querySelector('.login-btn-label').textContent = data.user.email.split('@')[0];
                 setTimeout(() => { modal.style.display = 'none'; }, 1200);
             }
         });
